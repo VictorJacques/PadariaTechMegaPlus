@@ -1,3 +1,15 @@
+function allStorage() {
+  var values = [],
+    keys = Object.keys(localStorage),
+    i = keys.length;
+
+  while (i--) {
+    values.push(JSON.parse(localStorage.getItem(keys[i])));
+  }
+
+  return values;
+}
+
 class CaixaRegistradora {
   constructor() {
     this.estoque = [];
@@ -10,6 +22,11 @@ class CaixaRegistradora {
       preço,
       quantidade,
     });
+    localStorage.setItem(
+      nome,
+      JSON.stringify(this.estoque[this.estoque.length - 1])
+    );
+    this.estoque = allStorage().slice();
   }
   atualizarProduto() {
     let codigoAPesquisar = parseInt(prompt("Qual o código do produto?"));
@@ -20,9 +37,11 @@ class CaixaRegistradora {
         if (açao == "valor") {
           let decisao = parseFloat(prompt("Qual o novo valor?"));
           produtos.preço = decisao;
+          localStorage.setItem(produtos.nome, JSON.stringify(produtos));
         } else if (açao == "quantidade") {
           let decisao = parseInt(prompt("Quantos produtos quer adicionar?"));
           produtos.quantidade = produtos.quantidade + decisao;
+          localStorage.setItem(produtos.nome, JSON.stringify(produtos));
         }
       }
     });
@@ -30,11 +49,15 @@ class CaixaRegistradora {
   iniciarAtendimento(nomeCliente) {
     this.clientes.push({ nome: nomeCliente, total: 0 });
   }
+  syncEstoque() {
+    this.estoque = allStorage().slice();
+  }
   passarProduto(codigo, quantidadeAPassar) {
     this.estoque.filter((produtos) => {
       if (produtos.codigo == codigo) {
         if (quantidadeAPassar <= produtos.quantidade) {
           produtos.quantidade = produtos.quantidade - quantidadeAPassar;
+          localStorage.setItem(produtos.nome, JSON.stringify(produtos));
           this.clientes[this.clientes.length - 1].total =
             this.clientes[this.clientes.length - 1].total +
             produtos.preço * quantidadeAPassar;
@@ -50,12 +73,9 @@ class CaixaRegistradora {
   fecharConta(dinheiro) {
     let troco = dinheiro - this.clientes[this.clientes.length - 1].total;
     window.alert(`O troco é ${troco}`);
+    this.clientes[this.clientes.length - 1].total = 0;
   }
 }
 
 let atendimento = new CaixaRegistradora();
-
-atendimento.adicionarProdutoAoEstoque(1, "Suco", 6.89, 5);
-atendimento.adicionarProdutoAoEstoque(2, "Bolacha", 2.35, 5);
-console.log(atendimento.estoque);
-atendimento.iniciarAtendimento("joao");
+atendimento.syncEstoque();
