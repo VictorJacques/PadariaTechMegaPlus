@@ -79,3 +79,10 @@ class CaixaRegistradora {
 
 let atendimento = new CaixaRegistradora();
 atendimento.syncEstoque();
+
+const clickBotaoIniciarAtendimento = () => {
+  let nome = prompt("Qual o nome do cliente?");
+  atendimento.iniciarAtendimento(nome);
+}
+
+botaoIniciarAtendimento.addEventListener("click",clickBotaoIniciarAtendimento)
